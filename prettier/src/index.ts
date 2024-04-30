@@ -1,4 +1,4 @@
-import { format } from "prettier";
+import { format } from "@prettier/sync";
 import { parse } from "../../parser/dist/index";
 import printers from "./printHubl";
 

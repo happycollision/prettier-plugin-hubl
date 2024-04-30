@@ -1,5 +1,5 @@
 import { Doc } from "prettier";
-import { doc, util, format } from "prettier";
+import { doc, util, format } from "@prettier/sync";
 const {
   builders: {
     group,
