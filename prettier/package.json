@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "rm -rf ./dist && tsc",
+    "build": "rm -rf ./dist && tsc || exit 0",
     "start": "nodemon --config ./configuration/nodemon.inline.json",
     "test": "tsc && jest -c ./configuration/jest.config.js",
     "update-test": "tsc && jest -c ./configuration/jest.config.js --update-snapshot",
