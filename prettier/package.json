@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "rm -rf ./dist && tsc || exit 0",
+    "build": "rm -rf ./dist && tsc",
     "start": "nodemon --config ./configuration/nodemon.inline.json",
     "test": "tsc && jest -c ./configuration/jest.config.js",
     "update-test": "tsc && jest -c ./configuration/jest.config.js --update-snapshot",
@@ -15,11 +15,11 @@
   "author": "HubSpot, Inc.",
   "license": "Apache-2.0",
   "dependencies": {
-    "prettier": "^2.4.1"
+    "prettier": "^3.2.5"
   },
   "devDependencies": {
     "@types/node": "^16.10.2",
-    "@types/prettier": "^2.4.1",
+    "@types/prettier": "^3.0.0",
     "foreman": "^3.0.1",
     "jest": "^27.0.0",
     "jest-watch-typeahead": "^0.2.1",
