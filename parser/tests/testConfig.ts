@@ -1,5 +1,5 @@
 import "colors";
-import { parse } from "../dist/index";
+import { parse } from "../src/index";
 import fs from "fs";
 import path from "path";
 
@@ -41,7 +41,7 @@ try {
     filesToTest.push(
       getFiles(simpleWorkingPath),
       getFiles(simpleBrokenPath),
-      getFiles(complexPath)
+      getFiles(complexPath),
     );
   } else {
     filesToTest = args
@@ -74,7 +74,7 @@ try {
         const output = parse(
           fs.readFileSync(`${folderPath}/${file}`, "utf-8"),
           {},
-          {}
+          {},
         );
 
         if (!process.argv.slice(2).includes("--silent")) {
@@ -95,7 +95,7 @@ try {
         if (e.code === "ENOENT") {
           console.log(
             `File path for testing a single should be the path to a test file from the CWD`
-              .yellow
+              .yellow,
           );
         }
       }

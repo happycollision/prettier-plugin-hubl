@@ -1,5 +1,6 @@
-import { Doc } from "prettier";
-import { doc, util, format } from "prettier";
+import type { Doc } from "prettier";
+import { doc, util } from "prettier";
+import sync from "@prettier/sync";
 const {
   builders: {
     group,
@@ -62,11 +63,11 @@ const printTagArgs = (node) => {
   });
 };
 
-const printJsonBody = async (node) => {
+const printJsonBody = (node) => {
   try {
     // This is a predictable tag structure
     const bodyText = node.children[0].children[0].value;
-    const formattedBodyText = await format(bodyText, { parser: "json" });
+    const formattedBodyText = sync.format(bodyText, { parser: "json" });
     return join(line, formattedBodyText.trim().split("\n"));
   } catch (e) {
     // If JSON parsing fails, we can fall back on the normal printer
@@ -79,7 +80,7 @@ const printForValues = (node) => {
     ", ",
     node.children.map((child) => {
       return printHubl(child);
-    })
+    }),
   );
 };
 
@@ -130,7 +131,7 @@ const printBody = (node) => {
 // This is the main print function, which will determine the type of node and
 // print accordingly. It is recursive, so it will call itself to print nested
 // nodes.
-async function printHubl(node) {
+function printHubl(node) {
   if (!node) {
     return "";
   }
@@ -149,7 +150,7 @@ async function printHubl(node) {
           ", ",
           node.targets.map((target) => {
             return target.value;
-          })
+          }),
         ),
         " = ",
         printHubl(node.value),
@@ -179,7 +180,7 @@ async function printHubl(node) {
       ifParts.push(
         openTag(node.whiteSpace.closingTag),
         " endif ",
-        closeTag(node.whiteSpace.closingTag)
+        closeTag(node.whiteSpace.closingTag),
       );
       return group(ifParts);
     case "InlineIf":
@@ -262,7 +263,7 @@ async function printHubl(node) {
             ",",
             node.children.map((child) => {
               return [line, printHubl(child)];
-            })
+            }),
           ),
         ]),
         softline,
@@ -324,7 +325,7 @@ async function printHubl(node) {
           ", ",
           node.args.children.map((arg) => {
             return printHubl(arg);
-          })
+          }),
         ),
         ")",
       ];
@@ -366,7 +367,7 @@ async function printHubl(node) {
           [",", lineType],
           node.children.map((kw) => {
             return group([kw.key.value, "=", printHubl(kw.value)]);
-          })
+          }),
         ),
       ];
 
@@ -378,9 +379,9 @@ async function printHubl(node) {
             ",",
             node.children.map((kw) => {
               return [hardline, printHubl(kw.key), ": ", printHubl(kw.value)];
-            })
-          )
-        )
+            }),
+          ),
+        ),
       );
       dictParts.push(hardline, "}");
       return dictParts;
@@ -415,7 +416,7 @@ async function printHubl(node) {
               ", ",
               node.args.children.map((arg) => {
                 return printHubl(arg);
-              })
+              }),
             ),
             ")",
             " ",
@@ -531,7 +532,7 @@ async function printHubl(node) {
         }
       } else if (node.type === "block_tag") {
         if (node.value === "json_block") {
-          return [indent([line, await printJsonBody(node.body)]), line];
+          return [indent([line, printJsonBody(node.body)]), line];
         }
         return [
           group([
@@ -553,7 +554,6 @@ async function printHubl(node) {
 
 function print(path, options, print) {
   const parsedArray = path.stack[0];
-
   return printHubl(parsedArray);
 }
 export default {

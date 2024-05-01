@@ -1,4 +1,5 @@
-import { format } from "prettier";
+import type { Plugin } from "prettier";
+import sync from "@prettier/sync";
 import { parse } from "../../parser/dist/index";
 import printers from "./printHubl";
 
@@ -31,7 +32,7 @@ const lookupDuplicateNestedToken = (match) => {
   }
 };
 
-const tokenize = (input) => {
+const tokenize = (input: string) => {
   const COMMENT_REGEX = /{#.*?#}/gms;
   const HUBL_TAG_REGEX = /({%.+?%})/gs;
   const LINE_BREAK_REGEX = /[\r\n]+/gm;
@@ -130,7 +131,7 @@ const tokenize = (input) => {
       tokenIndex++;
       tokenMap.set(
         `<!--placeholder-${tokenIndex}-->`,
-        `{% json_block %}${match}{% end_json_block %}`
+        `{% json_block %}${match}{% end_json_block %}`,
       );
       input = input.replace(match, `<!--placeholder-${tokenIndex}-->`);
     });
@@ -142,7 +143,7 @@ const tokenize = (input) => {
       tokenIndex++;
       tokenMap.set(
         `<!--placeholder-${tokenIndex}-->`,
-        match.replace(LINE_BREAK_REGEX, " ")
+        match.replace(LINE_BREAK_REGEX, " "),
       );
       input = input.replace(match, `<!--placeholder-${tokenIndex}-->`);
     });
@@ -159,7 +160,7 @@ const tokenize = (input) => {
   tokenIndex = 0;
   return input;
 };
-const unTokenize = (input) => {
+const unTokenize = (input: string) => {
   tokenMap.forEach((value, key) => {
     // Placeholders in styleblocks need special treatment
     if (key.startsWith("/*styleblock")) {
@@ -167,7 +168,7 @@ const unTokenize = (input) => {
       const escapedKey = key.replace(/\//g, "\\/").replace(/\*/g, "\\*");
       const STYLEBLOCK_REGEX = new RegExp(
         `${key.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")}\\s;`,
-        "gm"
+        "gm",
       );
       // HTML formatter sometimes adds a space after the placeholder comment so we check for it and remove if it exists
       if (STYLEBLOCK_REGEX.test(input)) {
@@ -185,7 +186,7 @@ const unTokenize = (input) => {
   return input;
 };
 
-const preserveFormatting = (input) => {
+const preserveFormatting = (input: string) => {
   const BEGIN_PRE_REGEX = /<pre.*?>/gms;
   const END_PRE_REGEX = /(?<!{% end_preserve %})<\/pre>/gms;
 
@@ -199,18 +200,18 @@ const preserveFormatting = (input) => {
   return input;
 };
 
-const parsers = {
+const parsers: Plugin["parsers"] = {
   hubl: {
     astFormat: "hubl-ast",
     parse,
     locStart,
     locEnd,
-    preprocess: (text) => {
+    preprocess: (text: string) => {
       let updatedText = text.trim();
       // Swap HubL tags for placeholders
       updatedText = tokenize(updatedText);
       // Parse and format HTML
-      updatedText = format(updatedText, { parser: "html" });
+      updatedText = sync.format(updatedText, { parser: "html" });
       // Find <pre> tags and add {% preserve %} wrapper
       // to tell the HubL parser to preserve formatting
       updatedText = preserveFormatting(updatedText);

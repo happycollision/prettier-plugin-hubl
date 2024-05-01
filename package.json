@@ -14,13 +14,17 @@
   "engines": {
     "node": ">=12"
   },
+  "workspaces": [
+    "parser",
+    "prettier"
+  ],
   "scripts": {
     "start": "nf start -j ./configuration/watch-all",
-    "watch-all": "yarn start",
+    "watch-all": "npm run start",
     "watch-prettier": "nf start -j ./configuration/watch-prettier",
     "watch-parser": "nf start -j ./configuration/watch-parser",
-    "build:parser": "cd ./parser && npm install && npm run build",
-    "build:prettier": "cd ./prettier && npm install && npm run build",
+    "build:parser": "npm run build -w parser",
+    "build:prettier": "npm run build -w prettier",
     "prepare": "(npm run build:parser) && (npm run build:prettier)",
     "npm:publish-beta": "npm publish . --tag beta",
     "npm:publish-latest": "npm publish . --tag latest"
