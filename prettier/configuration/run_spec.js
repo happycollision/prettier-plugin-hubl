@@ -41,10 +41,9 @@ function run_spec(dirname, options) {
         parser: "hubl"
       });
 
-      const output = prettyprint(input, mergedOptions);
-      test(filename, () => {
+      test(filename, async () => {
         expect(
-          raw(source + "~".repeat(mergedOptions.printWidth) + "\n" + output)
+          raw(source + "~".repeat(mergedOptions.printWidth) + "\n" + await prettyprint(input, mergedOptions))
         ).toMatchSnapshot();
       });
     }
@@ -53,8 +52,8 @@ function run_spec(dirname, options) {
 
 global.run_spec = run_spec;
 
-function prettyprint(src, options) {
-  const result = prettier.formatWithCursor(src, options);
+async function prettyprint(src, options) {
+  const result = await prettier.formatWithCursor(src, options);
   if (options.cursorOffset >= 0) {
     result.formatted =
       result.formatted.slice(0, result.cursorOffset) +
