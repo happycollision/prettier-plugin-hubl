@@ -32,8 +32,8 @@ const lookupDuplicateNestedToken = (match) => {
   }
 };
 
-const PRE_STYLE_BLOCK_TOKEN = "__STYLE_"
-const POST_STYLE_BLOCK_TOKEN = "_BLOCK__"
+const PRE_STYLE_BLOCK_TOKEN = "__STYLE_";
+const POST_STYLE_BLOCK_TOKEN = "_BLOCK__";
 
 function styleBlock(tokenIndex: number) {
   return PRE_STYLE_BLOCK_TOKEN + tokenIndex + POST_STYLE_BLOCK_TOKEN;
@@ -169,23 +169,6 @@ const tokenize = (input: string) => {
 };
 const unTokenize = (input: string) => {
   tokenMap.forEach((value, key) => {
-    // Placeholders in styleblocks need special treatment
-    if (key.startsWith(PRE_STYLE_BLOCK_TOKEN)) {
-      // The CSS comment needs to be escaped
-      const escapedKey = key.replace(/\//g, "\\/").replace(/\*/g, "\\*");
-      const STYLEBLOCK_REGEX = new RegExp(
-        `${key.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")}\\s;`,
-        "gm",
-      );
-      // HTML formatter sometimes adds a space after the placeholder comment so we check for it and remove if it exists
-      if (STYLEBLOCK_REGEX.test(input)) {
-        input = input.replace(new RegExp(escapedKey + " ;", "g"), value + ";");
-        return;
-      } else {
-        input = input.replace(new RegExp(escapedKey, "g"), value);
-        return;
-      }
-    }
     input = input.replace(new RegExp(key, "g"), value);
   });
   tokenMap.clear();
