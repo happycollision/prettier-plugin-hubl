@@ -32,11 +32,45 @@ const lookupDuplicateNestedToken = (match) => {
   }
 };
 
-const PRE_STYLE_BLOCK_TOKEN = "__STYLE_";
-const POST_STYLE_BLOCK_TOKEN = "_BLOCK__";
+const PRE_STYLE_BLOCK_TOKEN = "/*__STYLE_BLOCK";
+const POST_STYLE_BLOCK_TOKEN = "__*/";
 
-function styleBlock(tokenIndex: number) {
+function styleToken(tokenIndex: number) {
   return PRE_STYLE_BLOCK_TOKEN + tokenIndex + POST_STYLE_BLOCK_TOKEN;
+}
+
+const PRE_STYLE_VALUE_TOKEN = "__STYLE_VALUE_";
+const POST_STYLE_VALUE_TOKEN = "__";
+
+function styleValueToken(tokenIndex: number) {
+  return PRE_STYLE_VALUE_TOKEN + tokenIndex + POST_STYLE_VALUE_TOKEN;
+}
+
+const PRE_NESTED_SCRIPT_TOKEN = "_";
+
+function scriptToken(tokenIndex: number) {
+  return PRE_NESTED_SCRIPT_TOKEN + tokenIndex;
+}
+
+const PRE_NESTED_HTML_TAG_TOKEN = "npe";
+const POST_NESTED_HTML_TAG_TOKEN = "_";
+
+function htmlToken(tokenIndex: number) {
+  return PRE_NESTED_HTML_TAG_TOKEN + tokenIndex + POST_NESTED_HTML_TAG_TOKEN;
+}
+
+const PRE_COMMENT_TOKEN = "<!--";
+const POST_COMMENT_TOKEN = "-->";
+
+function commentToken(tokenIndex: number) {
+  return PRE_COMMENT_TOKEN + tokenIndex + POST_COMMENT_TOKEN;
+}
+
+const PRE_GENERIC_TOKEN = "<!--placeholder-";
+const POST_GENERIC_TOKEN = "-->";
+
+function genericToken(tokenIndex: number) {
+  return PRE_GENERIC_TOKEN + tokenIndex + POST_GENERIC_TOKEN;
 }
 
 const tokenize = (input: string) => {
@@ -53,23 +87,41 @@ const tokenize = (input: string) => {
   // Replace tags in style block
   const nestedStyleTags = input.match(STYLE_BLOCK_WITH_HUBL_REGEX);
   if (nestedStyleTags) {
+    const COMMENT_REGEX_WITH_LEAD = /(:\s*)?({#.*?#})/gms;
+    const VARIABLE_REGEX_WITH_LEAD = /(:\s*)?({{.+?}})/gs;
+    const HUBL_TAG_REGEX_WITH_LEAD = /(:\s*)?({%.+?%})/gs;
     nestedStyleTags.forEach((tag) => {
-      let newString;
-      newString = tag.replace(HUBL_TAG_REGEX, (match) => {
+      let newString = "";
+      newString = tag.replace(HUBL_TAG_REGEX_WITH_LEAD, (all, lead, match) => {
         tokenIndex++;
-        tokenMap.set(styleBlock(tokenIndex), match);
-        return styleBlock(tokenIndex);
+        const token = lead
+          ? styleValueToken(tokenIndex)
+          : styleToken(tokenIndex);
+        tokenMap.set(token, match);
+        return (lead || "") + token;
       });
-      newString = newString.replace(VARIABLE_REGEX, (match) => {
-        tokenIndex++;
-        tokenMap.set(styleBlock(tokenIndex), match);
-        return styleBlock(tokenIndex);
-      });
-      newString = newString.replace(COMMENT_REGEX, (match) => {
-        tokenIndex++;
-        tokenMap.set(styleBlock(tokenIndex), match);
-        return styleBlock(tokenIndex);
-      });
+      newString = newString.replace(
+        VARIABLE_REGEX_WITH_LEAD,
+        (all, lead, match) => {
+          tokenIndex++;
+          const token = lead
+            ? styleValueToken(tokenIndex)
+            : styleToken(tokenIndex);
+          tokenMap.set(token, match);
+          return (lead || "") + token;
+        },
+      );
+      newString = newString.replace(
+        COMMENT_REGEX_WITH_LEAD,
+        (all, lead, match) => {
+          tokenIndex++;
+          const token = lead
+            ? styleValueToken(tokenIndex)
+            : styleToken(tokenIndex);
+          tokenMap.set(token, match);
+          return (lead || "") + token;
+        },
+      );
       input = input.replace(tag, newString);
     });
   }
@@ -81,18 +133,18 @@ const tokenize = (input: string) => {
       let newString;
       newString = tag.replace(HUBL_TAG_REGEX, (match) => {
         tokenIndex++;
-        tokenMap.set(`_${tokenIndex}`, match);
-        return `_${tokenIndex}`;
+        tokenMap.set(scriptToken(tokenIndex), match);
+        return scriptToken(tokenIndex);
       });
       newString = newString.replace(VARIABLE_REGEX, (match) => {
         tokenIndex++;
-        tokenMap.set(`_${tokenIndex}`, match);
-        return `_${tokenIndex}`;
+        tokenMap.set(scriptToken(tokenIndex), match);
+        return scriptToken(tokenIndex);
       });
       newString = newString.replace(COMMENT_REGEX, (match) => {
         tokenIndex++;
-        tokenMap.set(`_${tokenIndex}`, match);
-        return `_${tokenIndex}`;
+        tokenMap.set(scriptToken(tokenIndex), match);
+        return scriptToken(tokenIndex);
       });
       input = input.replace(tag, newString);
     });
@@ -105,8 +157,8 @@ const tokenize = (input: string) => {
       let newString;
       newString = tag.replace(HUBL_TAG_REGEX, (match) => {
         tokenIndex++;
-        tokenMap.set(`npe${tokenIndex}_`, match);
-        return `npe${tokenIndex}_`;
+        tokenMap.set(htmlToken(tokenIndex), match);
+        return htmlToken(tokenIndex);
       });
       newString = newString.replace(VARIABLE_REGEX, (match) => {
         // Variables are sometimes used as HTML tag names
@@ -116,8 +168,8 @@ const tokenize = (input: string) => {
         }
 
         tokenIndex++;
-        tokenMap.set(`npe${tokenIndex}_`, match);
-        return `npe${tokenIndex}_`;
+        tokenMap.set(htmlToken(tokenIndex), match);
+        return htmlToken(tokenIndex);
       });
       input = input.replace(tag, newString);
     });
@@ -127,8 +179,8 @@ const tokenize = (input: string) => {
   if (comments) {
     comments.forEach((comment) => {
       tokenIndex++;
-      tokenMap.set(`<!--${tokenIndex}-->`, comment);
-      input = input.replace(comment, `<!--${tokenIndex}-->`);
+      tokenMap.set(commentToken(tokenIndex), comment);
+      input = input.replace(comment, commentToken(tokenIndex));
     });
   }
 
@@ -137,22 +189,22 @@ const tokenize = (input: string) => {
     jsonBlocks.forEach((match) => {
       tokenIndex++;
       tokenMap.set(
-        `<!--placeholder-${tokenIndex}-->`,
+        genericToken(tokenIndex),
         `{% json_block %}${match}{% end_json_block %}`,
       );
-      input = input.replace(match, `<!--placeholder-${tokenIndex}-->`);
+      input = input.replace(match, genericToken(tokenIndex));
     });
   }
 
-  const matches = input.match(HUBL_TAG_REGEX);
-  if (matches) {
-    matches.forEach((match) => {
+  const hublTags = input.match(HUBL_TAG_REGEX);
+  if (hublTags) {
+    hublTags.forEach((match) => {
       tokenIndex++;
       tokenMap.set(
-        `<!--placeholder-${tokenIndex}-->`,
+        genericToken(tokenIndex),
         match.replace(LINE_BREAK_REGEX, " "),
       );
-      input = input.replace(match, `<!--placeholder-${tokenIndex}-->`);
+      input = input.replace(match, genericToken(tokenIndex));
     });
   }
 
@@ -160,8 +212,8 @@ const tokenize = (input: string) => {
   if (expressionMatches) {
     expressionMatches.forEach((match) => {
       tokenIndex++;
-      tokenMap.set(`<!--placeholder-${tokenIndex}-->`, match);
-      input = input.replace(match, `<!--placeholder-${tokenIndex}-->`);
+      tokenMap.set(genericToken(tokenIndex), match);
+      input = input.replace(match, genericToken(tokenIndex));
     });
   }
   tokenIndex = 0;
@@ -169,7 +221,7 @@ const tokenize = (input: string) => {
 };
 const unTokenize = (input: string) => {
   tokenMap.forEach((value, key) => {
-    input = input.replace(new RegExp(key, "g"), value);
+    input = input.replaceAll(key, value);
   });
   tokenMap.clear();
 
