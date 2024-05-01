@@ -32,6 +32,13 @@ const lookupDuplicateNestedToken = (match) => {
   }
 };
 
+const PRE_STYLE_BLOCK_TOKEN = "__STYLE_"
+const POST_STYLE_BLOCK_TOKEN = "_BLOCK__"
+
+function styleBlock(tokenIndex: number) {
+  return PRE_STYLE_BLOCK_TOKEN + tokenIndex + POST_STYLE_BLOCK_TOKEN;
+}
+
 const tokenize = (input: string) => {
   const COMMENT_REGEX = /{#.*?#}/gms;
   const HUBL_TAG_REGEX = /({%.+?%})/gs;
@@ -50,18 +57,18 @@ const tokenize = (input: string) => {
       let newString;
       newString = tag.replace(HUBL_TAG_REGEX, (match) => {
         tokenIndex++;
-        tokenMap.set(`/*styleblock${tokenIndex}*/`, match);
-        return `/*styleblock${tokenIndex}*/`;
+        tokenMap.set(styleBlock(tokenIndex), match);
+        return styleBlock(tokenIndex);
       });
       newString = newString.replace(VARIABLE_REGEX, (match) => {
         tokenIndex++;
-        tokenMap.set(`/*styleblock${tokenIndex}*/`, match);
-        return `/*styleblock${tokenIndex}*/`;
+        tokenMap.set(styleBlock(tokenIndex), match);
+        return styleBlock(tokenIndex);
       });
       newString = newString.replace(COMMENT_REGEX, (match) => {
         tokenIndex++;
-        tokenMap.set(`/*styleblock${tokenIndex}*/`, match);
-        return `/*styleblock${tokenIndex}*/`;
+        tokenMap.set(styleBlock(tokenIndex), match);
+        return styleBlock(tokenIndex);
       });
       input = input.replace(tag, newString);
     });
@@ -163,7 +170,7 @@ const tokenize = (input: string) => {
 const unTokenize = (input: string) => {
   tokenMap.forEach((value, key) => {
     // Placeholders in styleblocks need special treatment
-    if (key.startsWith("/*styleblock")) {
+    if (key.startsWith(PRE_STYLE_BLOCK_TOKEN)) {
       // The CSS comment needs to be escaped
       const escapedKey = key.replace(/\//g, "\\/").replace(/\*/g, "\\*");
       const STYLEBLOCK_REGEX = new RegExp(
