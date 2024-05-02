@@ -1,2 +1,2 @@
-parser: yarn --cwd ./parser watch-build
-prettier: yarn --cwd ./prettier watch-all
+parser: npm run --prefix ./parser watch-build
+prettier: npm run --prefix ./prettier watch-all

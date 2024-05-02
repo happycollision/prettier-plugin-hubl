@@ -1,6 +1,6 @@
 {
   "watch": ["tests", "src"],
-  "exec": "yarn test",
+  "exec": "npm run test",
   "ext": "js, json, ts, proto, html",
   "ignoreRoot": [".git"]
 }

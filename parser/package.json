@@ -17,14 +17,14 @@
   },
   "scripts": {
     "build": "rm -rf ./dist && tsc",
-    "start": "yarn watch-all",
+    "start": "npm run watch-all",
     "test": "tsc && ts-node ./tests/testConfig.ts",
     "watch": "nodemon --config nodemon.test.json",
-    "watch-all": "yarn watch --simple-working --simple-broken --complex",
-    "watch-simple": "yarn watch --simple-working",
-    "watch-complex": "yarn watch --complex",
-    "watch-broken": "yarn watch --simple-broken",
-    "watch-single": "yarn watch",
+    "watch-all": "npm run watch --simple-working --simple-broken --complex",
+    "watch-simple": "npm run watch --simple-working",
+    "watch-complex": "npm run watch --complex",
+    "watch-broken": "npm run watch --simple-broken",
+    "watch-single": "npm run watch",
     "watch-build": "nodemon --config nodemon.build.json"
   },
   "repository": {

@@ -9,7 +9,7 @@
     "test": "tsc && jest -c ./configuration/jest.config.js",
     "update-test": "tsc && jest -c ./configuration/jest.config.js --update-snapshot",
     "watch": "nodemon --config ./configuration/nodemon.test.json",
-    "watch-all": "yarn watch",
+    "watch-all": "npm run watch",
     "test-inline": "tsc && node ./src/test-inline.ts"
   },
   "author": "HubSpot, Inc.",
