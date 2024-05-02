@@ -1,5 +1,5 @@
 import "colors";
-import { parse } from "../dist/index";
+import { parse } from "../src/index";
 import fs from "fs";
 import path from "path";
 
