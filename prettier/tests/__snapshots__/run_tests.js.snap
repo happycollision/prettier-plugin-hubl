@@ -524,7 +524,7 @@ templateType: none
 <!--
 templateType: none
 -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="{{ html_lang }}" {{ html_lang_dir }}>
   <head>
     <meta charset="utf-8" />
@@ -1128,19 +1128,19 @@ screenshotPath: ../images/template-previews/hubdb.png
         {% require_js %}
           <script>
             const pageEditor = document.querySelector(
-              ".hs-inline-edit .body-container--hubdb > .content-wrapper {{ variable }}"
+              ".hs-inline-edit .body-container--hubdb > .content-wrapper {{ variable }}",
             );
             if (pageEditor) {
               const headerNode = document.createElement("h1");
               const headerTextNode = document.createTextNode(
-                "Error: No HubDB table has been selected."
+                "Error: No HubDB table has been selected.",
               );
               headerNode.appendChild(headerTextNode);
               pageEditor.appendChild(headerNode);
 
               const linkNode = document.createElement("a");
               const linkTextNode = document.createTextNode(
-                "Learn how to select a HubDB table"
+                "Learn how to select a HubDB table",
               );
               linkNode.appendChild(linkTextNode);
               linkNode.href =
@@ -3845,7 +3845,7 @@ This is a simple dialog rendered by using a macro and a call block.
     unsubscribe_all_success="You have successfully unsubscribed from all email communications.",
     subscription_update_success="You have successfully updated your email preferences.",
     subheader_text="If this is not your email address, please ignore this page since the email associated with this page was most likely forwarded to you." %}
-  <!DOCTYPE html>
+  <!doctype html>
   <html lang="en">
     <head>
       {% block head %}
