@@ -1,16 +1,16 @@
 {
   "name": "@hubspot/prettier-plugin-hubl",
-  "version": "0.2.8",
+  "version": "0.3.0",
   "main": "prettier-plugin-hubl.js",
   "dependencies": {},
   "peerDependencies": {
-    "prettier": "2.x"
+    "prettier": "3.x"
   },
   "devDependencies": {
     "foreman": "^3.0.1"
   },
   "engines": {
-    "node": ">=12"
+    "node": ">=16"
   },
   "scripts": {
     "start": "nf start -j ./configuration/watch-all",

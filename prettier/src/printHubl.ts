@@ -1,5 +1,6 @@
 import { Doc } from "prettier";
-import { doc, util, format } from "prettier";
+import { doc, util } from "prettier";
+import prettierSync from "@prettier/sync"
 const {
   builders: {
     group,
@@ -66,7 +67,7 @@ const printJsonBody = (node) => {
   try {
     // This is a predictable tag structure
     const bodyText = node.children[0].children[0].value;
-    const formattedBodyText = format(bodyText, { parser: "json" });
+    const formattedBodyText = prettierSync.format(bodyText, { parser: "json" });
     return join(line, formattedBodyText.trim().split("\n"));
   } catch (e) {
     // If JSON parsing fails, we can fall back on the normal printer

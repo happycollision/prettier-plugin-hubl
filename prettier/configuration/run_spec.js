@@ -41,20 +41,20 @@ function run_spec(dirname, options) {
         parser: "hubl",
       });
 
-      test(filename, () => {
+      test(filename, async () => {
         expect(
           raw(
             source +
               "~".repeat(mergedOptions.printWidth) +
               "\n" +
-              prettyprint(input, mergedOptions)
+              (await prettyprint(input, mergedOptions))
           )
         ).toMatchSnapshot();
       });
 
       test(`${filename}: results are idempotent`, async () => {
-        const firstFormat = prettyprint(input, mergedOptions);
-        const secondFormat = prettyprint(firstFormat, mergedOptions);
+        const firstFormat = await prettyprint(input, mergedOptions);
+        const secondFormat = await prettyprint(firstFormat, mergedOptions);
         expect(secondFormat).toEqual(firstFormat);
       });
     }
@@ -63,8 +63,8 @@ function run_spec(dirname, options) {
 
 global.run_spec = run_spec;
 
-function prettyprint(src, options) {
-  const result = prettier.formatWithCursor(src, options);
+async function prettyprint(src, options) {
+  const result = await prettier.formatWithCursor(src, options);
   if (options.cursorOffset >= 0) {
     result.formatted =
       result.formatted.slice(0, result.cursorOffset) +

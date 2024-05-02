@@ -1,4 +1,5 @@
-import { format } from "prettier";
+import type {Plugin} from "prettier";
+import prettierSync from "@prettier/sync";
 import { parse } from "../../parser/dist/index";
 import printers from "./printHubl";
 
@@ -199,7 +200,7 @@ const preserveFormatting = (input) => {
   return input;
 };
 
-const parsers = {
+const parsers: Plugin["parsers"] = {
   hubl: {
     astFormat: "hubl-ast",
     parse,
@@ -210,7 +211,7 @@ const parsers = {
       // Swap HubL tags for placeholders
       updatedText = tokenize(updatedText);
       // Parse and format HTML
-      updatedText = format(updatedText, { parser: "html" });
+      updatedText = prettierSync.format(updatedText, { parser: "html" });
       // Find <pre> tags and add {% preserve %} wrapper
       // to tell the HubL parser to preserve formatting
       updatedText = preserveFormatting(updatedText);

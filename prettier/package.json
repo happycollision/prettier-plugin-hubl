@@ -15,11 +15,11 @@
   "author": "HubSpot, Inc.",
   "license": "Apache-2.0",
   "dependencies": {
-    "prettier": "^2.4.1"
+    "@prettier/sync": "0.5.2",
+    "prettier": "3.0.0"
   },
   "devDependencies": {
     "@types/node": "^16.10.2",
-    "@types/prettier": "^2.4.1",
     "foreman": "^3.0.1",
     "jest": "^27.0.0",
     "jest-watch-typeahead": "^0.2.1",
