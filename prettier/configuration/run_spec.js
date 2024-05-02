@@ -6,7 +6,7 @@ const path = require("path");
 const prettier = require("prettier");
 
 function run_spec(dirname, options) {
-  fs.readdirSync(dirname).forEach(filename => {
+  fs.readdirSync(dirname).forEach((filename) => {
     const filepath = dirname + filename;
     if (
       path.extname(filename) !== ".snap" &&
@@ -38,14 +38,24 @@ function run_spec(dirname, options) {
         rangeStart,
         rangeEnd,
         cursorOffset,
-        parser: "hubl"
+        parser: "hubl",
       });
 
-      const output = prettyprint(input, mergedOptions);
       test(filename, () => {
         expect(
-          raw(source + "~".repeat(mergedOptions.printWidth) + "\n" + output)
+          raw(
+            source +
+              "~".repeat(mergedOptions.printWidth) +
+              "\n" +
+              prettyprint(input, mergedOptions)
+          )
         ).toMatchSnapshot();
+      });
+
+      test(`${filename}: results are idempotent`, async () => {
+        const firstFormat = prettyprint(input, mergedOptions);
+        const secondFormat = prettyprint(firstFormat, mergedOptions);
+        expect(secondFormat).toEqual(firstFormat);
       });
     }
   });
@@ -84,7 +94,7 @@ function mergeDefaultOptions(parserConfig) {
   return Object.assign(
     {
       plugins: [path.resolve(path.dirname(__dirname), "dist/index.js")],
-      printWidth: 80
+      printWidth: 80,
     },
     parserConfig
   );
