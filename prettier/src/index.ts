@@ -1,4 +1,4 @@
-import type {Plugin} from "prettier";
+import type { Plugin } from "prettier";
 import prettierSync from "@prettier/sync";
 import { parse } from "../../parser/dist/index";
 import printers from "./printHubl";
@@ -32,7 +32,31 @@ const lookupDuplicateNestedToken = (match) => {
   }
 };
 
-const tokenize = (input) => {
+function styleToken(tokenIndex: number) {
+  return `/*__STYLE_BLOCK_${tokenIndex}__*/`;
+}
+
+function styleValueToken(tokenIndex: number) {
+  return `__STYLE_VALUE_${tokenIndex}__`;
+}
+
+function scriptToken(tokenIndex: number) {
+  return "_" + tokenIndex;
+}
+
+function htmlToken(tokenIndex: number) {
+  return `npe${tokenIndex}_`;
+}
+
+function commentToken(tokenIndex: number) {
+  return `<!--${tokenIndex}-->`;
+}
+
+function genericToken(tokenIndex: number) {
+  return `<!--placeholder-${tokenIndex}-->`;
+}
+
+const tokenize = (input: string) => {
   const COMMENT_REGEX = /{#.*?#}/gms;
   const HUBL_TAG_REGEX = /({%.+?%})/gs;
   const LINE_BREAK_REGEX = /[\r\n]+/gm;
@@ -46,61 +70,61 @@ const tokenize = (input) => {
   // Replace tags in style block
   const nestedStyleTags = input.match(STYLE_BLOCK_WITH_HUBL_REGEX);
   if (nestedStyleTags) {
-    nestedStyleTags.forEach((tag) => {
-      let newString;
-      newString = tag.replace(HUBL_TAG_REGEX, (match) => {
-        tokenIndex++;
-        tokenMap.set(`/*styleblock${tokenIndex}*/`, match);
-        return `/*styleblock${tokenIndex}*/`;
-      });
-      newString = newString.replace(VARIABLE_REGEX, (match) => {
-        tokenIndex++;
-        tokenMap.set(`/*styleblock${tokenIndex}*/`, match);
-        return `/*styleblock${tokenIndex}*/`;
-      });
-      newString = newString.replace(COMMENT_REGEX, (match) => {
-        tokenIndex++;
-        tokenMap.set(`/*styleblock${tokenIndex}*/`, match);
-        return `/*styleblock${tokenIndex}*/`;
-      });
+    const HUBL_TAG_REGEX_WITH_LEAD = /(:\s*)?({%.+?%})/gs;
+    const VARIABLE_REGEX_WITH_LEAD = /(:\s*)?({{.+?}})/gs;
+    const COMMENT_REGEX_WITH_LEAD = /(:\s*)?({#.*?#})/gms;
+
+    for (const tag of nestedStyleTags) {
+      let newString = tag;
+      for (const regex of [
+        HUBL_TAG_REGEX_WITH_LEAD,
+        VARIABLE_REGEX_WITH_LEAD,
+        COMMENT_REGEX_WITH_LEAD,
+      ]) {
+        newString = newString.replace(regex, (all, lead, match) => {
+          tokenIndex++;
+          const token = lead
+            ? styleValueToken(tokenIndex)
+            : styleToken(tokenIndex);
+          tokenMap.set(token, match);
+          return (lead || "") + token;
+        });
+      }
+
       input = input.replace(tag, newString);
-    });
+    }
   }
 
   // Replace tags in script block
   const nestedScriptTags = input.match(SCRIPT_BLOCK_WITH_HUBL_REGEX);
   if (nestedScriptTags) {
-    nestedScriptTags.forEach((tag) => {
-      let newString;
-      newString = tag.replace(HUBL_TAG_REGEX, (match) => {
-        tokenIndex++;
-        tokenMap.set(`_${tokenIndex}`, match);
-        return `_${tokenIndex}`;
-      });
-      newString = newString.replace(VARIABLE_REGEX, (match) => {
-        tokenIndex++;
-        tokenMap.set(`_${tokenIndex}`, match);
-        return `_${tokenIndex}`;
-      });
-      newString = newString.replace(COMMENT_REGEX, (match) => {
-        tokenIndex++;
-        tokenMap.set(`_${tokenIndex}`, match);
-        return `_${tokenIndex}`;
-      });
+    for (const tag of nestedScriptTags) {
+      let newString = tag;
+
+      for (const regex of [HUBL_TAG_REGEX, VARIABLE_REGEX, COMMENT_REGEX]) {
+        newString = newString.replace(regex, (match) => {
+          tokenIndex++;
+          tokenMap.set(scriptToken(tokenIndex), match);
+          return scriptToken(tokenIndex);
+        });
+      }
+
       input = input.replace(tag, newString);
-    });
+    }
   }
 
   // Replace expressions inside of HTML tags first
   const nestedHtmlTags = input.match(HTML_TAG_WITH_HUBL_TAG_REGEX);
   if (nestedHtmlTags) {
     nestedHtmlTags.forEach((tag) => {
-      let newString;
-      newString = tag.replace(HUBL_TAG_REGEX, (match) => {
+      let newString = tag;
+
+      newString = newString.replace(HUBL_TAG_REGEX, (match) => {
         tokenIndex++;
-        tokenMap.set(`npe${tokenIndex}_`, match);
-        return `npe${tokenIndex}_`;
+        tokenMap.set(htmlToken(tokenIndex), match);
+        return htmlToken(tokenIndex);
       });
+
       newString = newString.replace(VARIABLE_REGEX, (match) => {
         // Variables are sometimes used as HTML tag names
         const token = lookupDuplicateNestedToken(match);
@@ -109,9 +133,10 @@ const tokenize = (input) => {
         }
 
         tokenIndex++;
-        tokenMap.set(`npe${tokenIndex}_`, match);
-        return `npe${tokenIndex}_`;
+        tokenMap.set(htmlToken(tokenIndex), match);
+        return htmlToken(tokenIndex);
       });
+
       input = input.replace(tag, newString);
     });
   }
@@ -120,8 +145,8 @@ const tokenize = (input) => {
   if (comments) {
     comments.forEach((comment) => {
       tokenIndex++;
-      tokenMap.set(`<!--${tokenIndex}-->`, comment);
-      input = input.replace(comment, `<!--${tokenIndex}-->`);
+      tokenMap.set(commentToken(tokenIndex), comment);
+      input = input.replace(comment, commentToken(tokenIndex));
     });
   }
 
@@ -130,22 +155,22 @@ const tokenize = (input) => {
     jsonBlocks.forEach((match) => {
       tokenIndex++;
       tokenMap.set(
-        `<!--placeholder-${tokenIndex}-->`,
-        `{% json_block %}${match}{% end_json_block %}`
+        genericToken(tokenIndex),
+        `{% json_block %}${match}{% end_json_block %}`,
       );
-      input = input.replace(match, `<!--placeholder-${tokenIndex}-->`);
+      input = input.replace(match, genericToken(tokenIndex));
     });
   }
 
-  const matches = input.match(HUBL_TAG_REGEX);
-  if (matches) {
-    matches.forEach((match) => {
+  const hublTags = input.match(HUBL_TAG_REGEX);
+  if (hublTags) {
+    hublTags.forEach((match) => {
       tokenIndex++;
       tokenMap.set(
-        `<!--placeholder-${tokenIndex}-->`,
-        match.replace(LINE_BREAK_REGEX, " ")
+        genericToken(tokenIndex),
+        match.replace(LINE_BREAK_REGEX, " "),
       );
-      input = input.replace(match, `<!--placeholder-${tokenIndex}-->`);
+      input = input.replace(match, genericToken(tokenIndex));
     });
   }
 
@@ -153,40 +178,24 @@ const tokenize = (input) => {
   if (expressionMatches) {
     expressionMatches.forEach((match) => {
       tokenIndex++;
-      tokenMap.set(`<!--placeholder-${tokenIndex}-->`, match);
-      input = input.replace(match, `<!--placeholder-${tokenIndex}-->`);
+      tokenMap.set(genericToken(tokenIndex), match);
+      input = input.replace(match, genericToken(tokenIndex));
     });
   }
   tokenIndex = 0;
   return input;
 };
-const unTokenize = (input) => {
+
+const unTokenize = (input: string) => {
   tokenMap.forEach((value, key) => {
-    // Placeholders in styleblocks need special treatment
-    if (key.startsWith("/*styleblock")) {
-      // The CSS comment needs to be escaped
-      const escapedKey = key.replace(/\//g, "\\/").replace(/\*/g, "\\*");
-      const STYLEBLOCK_REGEX = new RegExp(
-        `${key.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")}\\s;`,
-        "gm"
-      );
-      // HTML formatter sometimes adds a space after the placeholder comment so we check for it and remove if it exists
-      if (STYLEBLOCK_REGEX.test(input)) {
-        input = input.replace(new RegExp(escapedKey + " ;", "g"), value + ";");
-        return;
-      } else {
-        input = input.replace(new RegExp(escapedKey, "g"), value);
-        return;
-      }
-    }
-    input = input.replace(new RegExp(key, "g"), value);
+    input = input.replaceAll(key, value);
   });
   tokenMap.clear();
 
   return input;
 };
 
-const preserveFormatting = (input) => {
+const preserveFormatting = (input: string) => {
   const BEGIN_PRE_REGEX = /<pre.*?>/gms;
   const END_PRE_REGEX = /(?<!{% end_preserve %})<\/pre>/gms;
 
