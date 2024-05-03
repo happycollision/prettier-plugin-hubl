@@ -6,8 +6,8 @@
   "scripts": {
     "build": "rm -rf ./dist && tsc",
     "start": "nodemon --config ./configuration/nodemon.inline.json",
-    "test": "tsc && node --experimental-vm-modules ./node_modules/jest/bin/jest.js -c ./configuration/jest.config.js",
-    "update-test": "tsc && node --experimental-vm-modules ./node_modules/jest/bin/jest.js -c ./configuration/jest.config.js --update-snapshot",
+    "test": "tsc && node --experimental-vm-modules ../node_modules/jest/bin/jest.js -c ./configuration/jest.config.js",
+    "update-test": "tsc && node --experimental-vm-modules ../node_modules/jest/bin/jest.js -c ./configuration/jest.config.js --update-snapshot",
     "watch": "nodemon --config ./configuration/nodemon.test.json",
     "watch-all": "npm run watch",
     "test-inline": "tsc && ts-node ./src/inline-test.ts"

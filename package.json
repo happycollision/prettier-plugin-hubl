@@ -17,12 +17,14 @@
     "watch-all": "npm run start",
     "watch-prettier": "nf start -j ./configuration/watch-prettier",
     "watch-parser": "nf start -j ./configuration/watch-parser",
-    "build:parser": "cd ./parser && npm install && npm run build",
-    "build:prettier": "cd ./prettier && npm install && npm run build",
-    "prepare": "(npm run build:parser) && (npm run build:prettier)",
+    "prepare": "npm run build --workspaces",
     "npm:publish-beta": "npm publish . --tag beta",
     "npm:publish-latest": "npm publish . --tag latest"
   },
+  "workspaces": [
+    "parser",
+    "prettier"
+  ],
   "files": [
     "parser/dist",
     "prettier/dist"
