@@ -1,2 +1,0 @@
-parser: npm run -w parser watch-build
-prettier: npm run -w prettier watch-all

@@ -61,6 +61,26 @@ npx prettier --write '**/*.html'
 
 Check under “Known Issues” to see if your error has been reported already. If not, feel free to [open up a new issue](https://github.com/HubSpot/prettier-plugin-hubl/issues/new). You can also review the expected formatting of different elements [here](./TYPE_DOCS.md).
 
+## Contributing
+
+To just get up and running, use the `start` script. This will build and watch relevant files, re-running all tests as changes occur.
+
+```
+npm run start
+```
+
+For a better experience with the `./prettier` tests, you'll want to use two terminals. In the first:
+
+```
+npm run build:watch
+```
+
+In the second, we will invoke Jest's built-in watcher, which gives you powerful options for interacting with the tests and also the ability to update snapshots:
+
+```
+npm run -w prettier test -- --watch
+```
+
 ## Community
 
 You can stay up to date with HubSpot CMS Boilerplate updates and discussions in the #hs-cms-boilerplate channel in the HubSpot Developer Slack.

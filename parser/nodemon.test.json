@@ -1,6 +1,6 @@
 {
-  "watch": ["src", "tests"],
-  "exec": "tsc && ts-node ./tests/testConfig.ts",
+  "watch": ["dist", "tests"],
+  "exec": "npm run test",
   "ext": "js, json, ts, proto, html",
   "ignoreRoot": [".git"]
 }

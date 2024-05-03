@@ -4,13 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "rm -rf ./dist && tsc",
-    "start": "nodemon --config ./configuration/nodemon.inline.json",
-    "test": "tsc && node --experimental-vm-modules ../node_modules/jest/bin/jest.js -c ./configuration/jest.config.js",
-    "update-test": "tsc && node --experimental-vm-modules ../node_modules/jest/bin/jest.js -c ./configuration/jest.config.js --update-snapshot",
-    "watch": "nodemon --config ./configuration/nodemon.test.json",
-    "watch-all": "npm run watch",
-    "test-inline": "tsc && ts-node ./src/inline-test.ts"
+    "clean": "rm -rf ./dist",
+    "build": "tsc",
+    "build:watch": "nodemon --config ./configuration/nodemon.build.json",
+    "test": "node --experimental-vm-modules ../node_modules/jest/bin/jest.js -c ./configuration/jest.config.js",
+    "test:watch": "nodemon --config ./configuration/nodemon.test.json",
+    "start": "npm run build && concurrently --raw 'npm:build:watch' 'npm:test:watch'"
   },
   "author": "HubSpot, Inc.",
   "license": "Apache-2.0",
@@ -20,7 +19,6 @@
   },
   "devDependencies": {
     "@types/node": "^16.10.2",
-    "foreman": "^3.0.1",
     "jest": "^27.0.0",
     "jest-watch-typeahead": "^0.2.1",
     "nodemon": "^2.0.13",

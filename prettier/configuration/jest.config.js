@@ -4,5 +4,9 @@ module.exports = {
   testEnvironment: "node",
   testRegex: "run_tests.js$",
   rootDir: "..",
-  transform: {}
+  transform: {},
+  watchPlugins: [
+    "jest-watch-typeahead/filename",
+    "jest-watch-typeahead/testname",
+  ],
 };

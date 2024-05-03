@@ -7,19 +7,17 @@
     "prettier": "3.x"
   },
   "devDependencies": {
-    "foreman": "^3.0.1"
+    "concurrently": "8.2.2"
   },
   "engines": {
     "node": ">=16"
   },
   "scripts": {
-    "start": "nf start -j ./configuration/watch-all",
-    "watch-all": "npm run start",
-    "watch-prettier": "nf start -j ./configuration/watch-prettier",
-    "watch-parser": "nf start -j ./configuration/watch-parser",
-    "prepare": "npm run build --workspaces",
-    "npm:publish-beta": "npm publish . --tag beta",
-    "npm:publish-latest": "npm publish . --tag latest"
+    "start": "concurrently --names 'parser  ',prettier 'npm run -w parser start' 'npm run -w prettier start'",
+    "prepare": "npm run clean --workspaces && npm run build --workspaces",
+    "build:watch": "concurrently --names 'parser  ',prettier 'npm run -w parser build:watch' 'npm run -w prettier build:watch'",
+    "npm:publish-beta": "npm run prepare && npm publish . --tag beta",
+    "npm:publish-latest": "npm run prepare && npm publish . --tag latest"
   },
   "workspaces": [
     "parser",

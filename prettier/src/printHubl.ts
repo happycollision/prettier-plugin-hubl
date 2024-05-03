@@ -1,6 +1,6 @@
 import { Doc } from "prettier";
 import { doc, util } from "prettier";
-import prettierSync from "@prettier/sync"
+import prettierSync from "@prettier/sync";
 const {
   builders: {
     group,
@@ -80,7 +80,7 @@ const printForValues = (node) => {
     ", ",
     node.children.map((child) => {
       return printHubl(child);
-    })
+    }),
   );
 };
 
@@ -150,7 +150,7 @@ function printHubl(node) {
           ", ",
           node.targets.map((target) => {
             return target.value;
-          })
+          }),
         ),
         " = ",
         printHubl(node.value),
@@ -180,7 +180,7 @@ function printHubl(node) {
       ifParts.push(
         openTag(node.whiteSpace.closingTag),
         " endif ",
-        closeTag(node.whiteSpace.closingTag)
+        closeTag(node.whiteSpace.closingTag),
       );
       return group(ifParts);
     case "InlineIf":
@@ -263,7 +263,7 @@ function printHubl(node) {
             ",",
             node.children.map((child) => {
               return [line, printHubl(child)];
-            })
+            }),
           ),
         ]),
         softline,
@@ -325,7 +325,7 @@ function printHubl(node) {
           ", ",
           node.args.children.map((arg) => {
             return printHubl(arg);
-          })
+          }),
         ),
         ")",
       ];
@@ -367,7 +367,7 @@ function printHubl(node) {
           [",", lineType],
           node.children.map((kw) => {
             return group([kw.key.value, "=", printHubl(kw.value)]);
-          })
+          }),
         ),
       ];
 
@@ -379,9 +379,9 @@ function printHubl(node) {
             ",",
             node.children.map((kw) => {
               return [hardline, printHubl(kw.key), ": ", printHubl(kw.value)];
-            })
-          )
-        )
+            }),
+          ),
+        ),
       );
       dictParts.push(hardline, "}");
       return dictParts;
@@ -416,7 +416,7 @@ function printHubl(node) {
               ", ",
               node.args.children.map((arg) => {
                 return printHubl(arg);
-              })
+              }),
             ),
             ")",
             " ",

@@ -1,5 +1,5 @@
 {
-  "watch": ["tests", "src"],
+  "watch": ["tests", "dist"],
   "exec": "npm run test",
   "ext": "js, json, ts, proto, html",
   "ignoreRoot": [".git"]
